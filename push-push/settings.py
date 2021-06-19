@@ -25,9 +25,11 @@ SECRET_KEY = 'django-insecure-)^qb9epk55v^e_t&8^o&s00o08s$etu15k_@k=w8uw9m9gj26s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+SITE_URL = '985baf8e0bb4.ngrok.io'
+
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    '*',
+    SITE_URL,
 ]
 
 
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'push',
 ]
 
 MIDDLEWARE = [

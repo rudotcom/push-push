@@ -52,7 +52,7 @@ function sendTokenToServer(currentToken) {
     if (!isTokenSentToServer(currentToken)) {
         console.log('Отправка токена на сервер...');
 
-        var url = ''; // адрес скрипта на сервере который сохраняет ID устройства
+        var url = 'firebase/'; // адрес скрипта на сервере который сохраняет ID устройства
         $.post(url, {
             token: currentToken
         });

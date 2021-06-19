@@ -11,28 +11,18 @@ var massage_id = $('#massage_id');
 var massage_row = $('#massage_row');
 
 var info = $('#info');
+var info_icon = $('#info-icon')
 var info_message = $('#info-message');
 
 var alert = $('#alert');
 var alert_message = $('#alert-message');
 
 var input_body = $('#body');
-var timerId = setInterval(setNotificationDemoBody, 10000);
-
-function setNotificationDemoBody() {
-    if (input_body.val().search(/^It's found today at \d\d:\d\d$/i) !== -1) {
-        var now = new Date();
-        input_body.val('It\'s found today at ' + now.getHours() + ':' + addZero(now.getMinutes()));
-    } else {
-        clearInterval(timerId);
-    }
-}
 
 function addZero(i) {
     return i > 9 ? i : '0' + i;
 }
 
-setNotificationDemoBody();
 resetUI();
 
 if (
@@ -83,18 +73,21 @@ if (
             notification[input.attr('name')] = input.val();
         });
 
-        sendNotification(notification);
+    //    sendNotification(notification);
     });
 
     // handle catch the notification on current page
     messaging.onMessage(function(payload) {
         console.log('Message received', payload);
         info.show();
+        info_icon
+            .append('<img src='+payload.notification.icon+' align=left>')
         info_message
             .text('')
-            .append('<strong>'+payload.data.title+'</strong>')
-            .append('<em>'+payload.data.body+'</em>')
+            .append('<h3>'+payload.notification.title+'</h3>')
+            .append('<em>'+payload.notification.body+'</em>')
         ;
+        bt_delete.hide();
 
         // register fake ServiceWorker for show notification on mobile devices
         navigator.serviceWorker.register('/firebase-messaging-sw.js');
@@ -102,9 +95,9 @@ if (
             if (permission === 'granted') {
                 navigator.serviceWorker.ready.then(function(registration) {
                   // Copy data object to get parameters in the click handler
-                  payload.data.data = JSON.parse(JSON.stringify(payload.data));
+                  payload.notification.data = JSON.parse(JSON.stringify(payload.notification));
 
-                  registration.showNotification(payload.data.title, payload.data);
+                  registration.showNotification(payload.notification.title, payload.notification);
                 }).catch(function(error) {
                     // registration failed :(
                     showError('ServiceWorker registration failed', error);
