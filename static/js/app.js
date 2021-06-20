@@ -2,7 +2,6 @@ firebase.initializeApp({
     messagingSenderId: '676057775386'
 });
 
-
 var bt_register = $('#register');
 var bt_delete = $('#delete');
 var token = $('#token');
@@ -50,17 +49,17 @@ if (
             .then(function(currentToken) {
                 messaging.deleteToken(currentToken)
                     .then(function() {
-                        console.log('Token deleted');
+                        console.log('Токен удален');
                         setTokenSentToServer(false);
                         // Once token is deleted update UI.
                         resetUI();
                     })
                     .catch(function(error) {
-                        showError('Unable to delete token', error);
+                        showError('Не могу удалить токен', error);
                     });
             })
             .catch(function(error) {
-                showError('Error retrieving Instance ID token', error);
+                showError('Ошибка получения токена экземпляра ID', error);
             });
     });
 
@@ -78,13 +77,13 @@ if (
 
     // handle catch the notification on current page
     messaging.onMessage(function(payload) {
-        console.log('Message received', payload);
+        console.log('Сообщение получено', payload);
         info.show();
         info_icon
             .append('<img src='+payload.notification.icon+' align=left>')
         info_message
             .text('')
-            .append('<h3>'+payload.notification.title+'</h3>')
+            .append('<h5>'+payload.notification.title+'</h5>')
             .append('<em>'+payload.notification.body+'</em>')
         ;
         bt_delete.hide();
@@ -100,7 +99,7 @@ if (
                   registration.showNotification(payload.notification.title, payload.notification);
                 }).catch(function(error) {
                     // registration failed :(
-                    showError('ServiceWorker registration failed', error);
+                    showError('Регистрация ServiceWorker неуспешна', error);
                 });
             }
         });
@@ -110,30 +109,30 @@ if (
     messaging.onTokenRefresh(function() {
         messaging.getToken()
             .then(function(refreshedToken) {
-                console.log('Token refreshed');
+                console.log('Токен обновлен');
                 // Send Instance ID token to app server.
                 sendTokenToServer(refreshedToken);
                 updateUIForPushEnabled(refreshedToken);
             })
             .catch(function(error) {
-                showError('Unable to retrieve refreshed token', error);
+                showError('Не удалось получить обновленный токен', error);
             });
     });
 
 } else {
     if (!('Notification' in window)) {
-        showError('Notification not supported');
+        showError('Уведомления не поддерживаются');
     } else if (!('serviceWorker' in navigator)) {
-        showError('ServiceWorker not supported');
+        showError('ServiceWorker не поддерживается');
     } else if (!('localStorage' in window)) {
-        showError('LocalStorage not supported');
+        showError('LocalStorage не поддерживается');
     } else if (!('fetch' in window)) {
-        showError('fetch not supported');
+        showError('fetch не поддерживается');
     } else if (!('postMessage' in window)) {
-        showError('postMessage not supported');
+        showError('postMessage не поддерживается');
     }
 
-    console.warn('This browser does not support desktop notification.');
+    console.warn('Этот браузер не поддерживает десктопные уведомления.');
     console.log('Is HTTPS', window.location.protocol === 'https:');
     console.log('Support Notification', 'Notification' in window);
     console.log('Support ServiceWorker', 'serviceWorker' in navigator);
@@ -157,64 +156,19 @@ function getToken() {
                         sendTokenToServer(currentToken);
                         updateUIForPushEnabled(currentToken);
                     } else {
-                        showError('No Instance ID token available. Request permission to generate one');
+                        showError('Нет токена экземпляра ID. Запросите разрешение на его получение');
                         updateUIForPushPermissionRequired();
                         setTokenSentToServer(false);
                     }
                 })
                 .catch(function(error) {
-                    showError('An error occurred while retrieving token', error);
+                    showError('Ошибка получения токена', error);
                     updateUIForPushPermissionRequired();
                     setTokenSentToServer(false);
                 });
         })
         .catch(function(error) {
-            showError('Unable to get permission to notify', error);
-        });
-}
-
-
-function sendNotification(notification) {
-    var key = 'AAAAnWgu_Ro:APA91bHJ7sudUMquTVgnSFEQE7MOvsb8Qwf_cGRZN11Do7Z7x2StayBP_zEL5YVKUzvqubd7KFJ317CLL4bD77s-bHroEfW6GvajPnGKsr1QZTOq5wuZt_2WbbvZ7d2SA4dyyC10fgdP';
-
-    console.log('Send notification', notification);
-
-    // hide last notification data
-    info.hide();
-    massage_row.hide();
-
-    messaging.getToken()
-        .then(function(currentToken) {
-            fetch('https://fcm.googleapis.com/fcm/send', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'key=' + key,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    // Firebase loses 'image' from the notification.
-                    // And you must see this: https://github.com/firebase/quickstart-js/issues/71
-                    data: notification,
-                    to: currentToken
-                })
-            }).then(function(response) {
-                return response.json();
-            }).then(function(json) {
-                console.log('Response', json);
-
-                if (json.success === 1) {
-                    massage_row.show();
-                    massage_id.text(json.results[0].message_id);
-                } else {
-                    massage_row.hide();
-                    massage_id.text(json.results[0].error);
-                }
-            }).catch(function(error) {
-                showError(error);
-            });
-        })
-        .catch(function(error) {
-            showError('Error retrieving Instance ID token', error);
+            showError('Не удалось получить права на уведомления', error);
         });
 }
 
@@ -228,7 +182,7 @@ function sendTokenToServer(currentToken) {
         //$.post(url, {token: currentToken});
         setTokenSentToServer(currentToken);
     } else {
-        console.log('Token already sent to server so won\'t send it again unless it changes');
+        console.log('Токен уже отправлен на сервер, поэтому он не будет отправляться пока не изменится');
     }
 }
 
@@ -276,4 +230,76 @@ function showError(error, error_data) {
         alert_message.html(error);
         console.error(error);
     }
+}
+
+//////////////////////////////// Регистрация токена в messaging и отправка через наш сервер ///////
+// браузер поддерживает уведомления?
+if ('Notification' in window) {
+    var messaging = firebase.messaging();
+
+    // пользователь уже разрешил получение уведомлений
+    // подписываем на уведомления если ещё не подписали
+    if (Notification.permission === 'granted') {
+        subscribe();
+    }
+
+    // по клику, запрашиваем у пользователя разрешение на уведомления
+    // и подписываем его
+    $('#subscribe').on('click', function () {
+        subscribe();
+    });
+}
+
+function subscribe() {
+    // запрашиваем разрешение на получение уведомлений
+    messaging.requestPermission()
+        .then(function () {
+            // получаем ID устройства
+            messaging.getToken()
+                .then(function (currentToken) {
+
+                    if (currentToken) {
+                        sendTokenToServer(currentToken);
+                    } else {
+                        console.warn('Не удалось получить токен.');
+                        setTokenSentToServer(false);
+                    }
+                })
+                .catch(function (err) {
+                    console.warn('При получении токена произошла ошибка.', err);
+                    setTokenSentToServer(false);
+                });
+    })
+    .catch(function (err) {
+        console.warn('Не удалось получить разрешение на показ уведомлений.', err);
+    });
+}
+
+// отправка ID на сервер
+function sendTokenToServer(currentToken) {
+    if (!isTokenSentToServer(currentToken)) {
+        console.log('Отправка токена на сервер...');
+
+        var url = 'firebase/'; // адрес скрипта на сервере который будет сохранять ID устройства
+        $.post(url, {
+            token: currentToken
+        });
+
+        setTokenSentToServer(currentToken);
+    } else {
+        console.log('Токен уже отправлен на сервер.');
+    }
+}
+
+// используем localStorage для отметки того,
+// что пользователь уже подписался на уведомления
+function isTokenSentToServer(currentToken) {
+    return window.localStorage.getItem('sentFirebaseMessagingToken') == currentToken;
+}
+
+function setTokenSentToServer(currentToken) {
+    window.localStorage.setItem(
+        'sentFirebaseMessagingToken',
+        currentToken ? currentToken : ''
+    );
 }

@@ -11,8 +11,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', csrf_exempt(home)),
     path('firebase/', csrf_exempt(save_token)),
-    path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/x-javascript')),
-    path('firebase-messaging-sw.js', TemplateView.as_view(template_name='firebase-messaging-sw.js', content_type='application/x-javascript'))
+    # path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/x-javascript')),
+    path('firebase-messaging-sw.js', TemplateView.as_view(template_name='firebase-messaging-sw.js', content_type='application/x-javascript')),
 
 ]
 
